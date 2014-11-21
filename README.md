@@ -1,6 +1,6 @@
 # doo.js
 
-Binds Javascript Objects to HTML Elements using the MVB(Modal-View-Binder) pattern.
+Binds Javascript Objects to HTML Elements using the MVB(Model-View-Binder) pattern.
 
 ## Mission
 
