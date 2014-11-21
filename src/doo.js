@@ -37,8 +37,6 @@
       , rArgs    = /(?:^|\s+)\{\s*([^\}]+)\s*}/g
       ;
 
-    //
-
     /*
      *  Generic auxiliar Functions
      */
@@ -279,60 +277,171 @@
     var dooCollectionProto
         = DooCollection.prototype = Object.create( arrayProto );
 
+    /*
+     * DooCollection Object Methods
+     */
+
+    // execute a given method in all children
+    function dooCollectionExecObjectMethod( fn ) {
+        var obj = this
+          , args = splice.call( arguments, 1 )
+          ;
+
+        obj.forEach( function ( child ) {
+            child[ fn ].apply( child, args );
+        });
+
+        return obj;
+    }
+
+    // returns a DooCollection (see Array.filter)
+    function dooCollectionFilterObjectMethod() {
+        return dooCollectionSliceObjectMethod.apply(
+            filter.apply( this, arguments )
+        );
+    }
+
+    // returns all hidden children
+    function dooCollectionHiddenObjectMethod() {
+        return this.filter( dooHiddenObjectMethod );
+    }
+
+    // returns all dooing children
+    function dooCollectionDooingObjectMethod() {
+        return this.filter( dooDooingObjectMethod );
+    }
+
+    // returns a DooCollection (see Array.map)
+    function dooCollectionMapObjectMethod() {
+        return dooCollectionSliceObjectMethod.apply(
+            map.apply( this, arguments )
+        );
+    }
+
+    // returns a DooCollection (see Array.slice)
+    function dooCollectionSliceObjectMethod() {
+        var obj = new DooCollection();
+        push.apply( obj, slice.apply( this, arguments ) );
+        return obj;
+    }
+
+    // returns a DooCollection (see Array.splice)
+    function dooCollectionSpliceObjectMethod() {
+        return dooCollectionSliceObjectMethod.apply(
+            splice.apply( this, arguments )
+        );
+    }
+
     merge( dooCollectionProto, {
-        // execute a given method in all children
-        exec: function ( fn ) {
-            var args = splice.call( arguments, 1 );
-            this.forEach( function ( child ) {
-                child[ fn ].apply( child, args );
-            });
-            return this;
-        }
-
-        // returns a DooCollection (see Array.filter)
-      , filter: function () {
-            return this.slice.apply( filter.apply( this, arguments ) );
-        }
-
-        // returns all hidden children
-      , hidden: function () {
-            return this.filter( dooHiddenObjectMethod );
-        }
-
-        // returns all dooing children
-      , dooing: function () {
-            return this.filter( dooDooingObjectMethod );
-        }
-
-        // returns a DooCollection (see Array.map)
-      , map: function () {
-            return this.slice.apply( map.apply( this, arguments ) );
-        }
-
-        // returns a DooCollection (see Array.slice)
-      , slice: function () {
-            var obj = new DooCollection();
-            push.apply( obj, slice.apply( this, arguments ) );
-            return obj;
-        }
-
-        // returns a DooCollection (see Array.splice)
-      , splice: function () {
-            return this.slice.apply( splice.apply( this, arguments ) );
-        }
-      , pop: popChildOrLastChild
+        exec  : dooCollectionExecObjectMethod
+      , filter: dooCollectionFilterObjectMethod
+      , hidden: dooCollectionHiddenObjectMethod
+      , dooing: dooCollectionDooingObjectMethod
+      , map   : dooCollectionMapObjectMethod
+      , slice : dooCollectionSliceObjectMethod
+      , splice: dooCollectionSpliceObjectMethod
+      , pop   : popChildOrLastChild
     });
 
     /*
      * DooGroupCollection
      */
     function DooGroupCollection() { DooCollection.apply( this, arguments ); }
-    DooGroupCollection.prototype = Object.create( DooCollection.prototype );
-    DooGroupCollection.prototype.byName = oGroup;
+    var dooGroupCollectionProto
+        = DooGroupCollection.prototype
+            = Object.create( dooCollectionProto );
+    dooGroupCollectionProto.byName = oGroup;
 
+    /*
+     * DooTemplateCollection
+     */
     function DooTemplateCollection() { push.apply( this, arguments ); }
-    DooTemplateCollection.prototype = Object.create( arrayProto );
-    DooTemplateCollection.prototype.byName = oTemplate;
+    var dooTemplateCollectionProto
+        = DooTemplateCollection.prototype
+            = Object.create( arrayProto );
+    dooTemplateCollectionProto.byName = oTemplate;
+
+    /*
+     * Doo
+     */
+    function Doo( elem, parent, args ) {
+        args = args || {};
+
+        var obj = this;
+        obj.elem = elem;
+        elem.dooObject = obj;
+
+        // Guid
+        obj.guid = guid++;
+
+        dooObjectSetGroupProp( obj, args.group || obj.group );
+
+        // TODO: dooObjectSetTemplateProp
+        var template = new DooTemplateCollection();
+        var defaultTemplate = args.template || obj.template;
+        if ( defaultTemplate )
+            template.push( oTemplate[ defaultTemplate ] );
+        obj.template = template;
+
+        // Get the object name (for path relation) and fix the name
+        //  if needed
+        var name = args.name
+                || elem.getAttribute('id')
+                || elem.getAttribute('name');
+
+        if ( name )
+            obj.name = name;
+
+        dooObjectSetIsProp( obj, args.is || [] );
+
+        if ( isObj( parent ) ) {
+            obj.root    = parent.root || parent;
+            obj.context = parent.isContext ? parent : parent.context;
+            obj.parent  = parent;
+        }
+        else
+            obj.root = obj.context = obj; // TODO: is this really needed???
+
+        dooObjectAttachElem( obj, elem );
+
+        return obj;
+    }
+
+    /*
+     * Doo Class Functions
+     */
+    function dooDefineClassFunction( name ) {
+        var impClasses = slice.call( arguments, 1 )
+          , override   = ( impClasses.pop() || {} ) // TODO: avoind creating unecessary object
+          ;
+
+        var ExtClass = impClasses.length > 0 ?
+                       impClasses.shift() : window[ Doo.defaultClass ];
+
+        /* jshint -W054 */
+        var Class = (
+            new Function(
+                "c",
+                'return function '
+                    + name
+                    + '(e,p,a) { c.call(this,e,p,a) }'
+            )
+        )( override.constructor === Object ? ExtClass : override.constructor );
+
+        Class.prototype = Object.create( ExtClass.prototype );
+
+        // TODO: re-avaluate this
+        var length = impClasses.length;
+        for ( var i = 0; i < length - 1; i++ ) {
+            var ImpClass = impClasses[ i ];
+            merge( Class.prototype, ImpClass.prototype );
+        }
+
+        merge( Class.prototype, override );
+
+        /* jshint boss: true */
+        return ( window[ name ] = Class );
+    }
 
     /*
      * Doo Object auxiliar Functions
@@ -384,114 +493,6 @@
                 function ( key ) { this[ 'is' + ucFirst( key ) ] = true; }
               , obj
             );
-    }
-
-    /*
-     * Doo
-     */
-    function Doo( elem, parent, args ) {
-        args = args || {};
-
-        var obj = this;
-        obj.elem = elem;
-        elem.dooObject = obj;
-
-        // Guid
-        obj.guid = guid++;
-
-        dooObjectSetGroupProp( obj, args.group || obj.group );
-
-        // TODO: dooObjectSetTemplateProp
-        var template = new DooTemplateCollection();
-        var defaultTemplate = args.template || obj.template;
-        console.log( defaultTemplate );
-        if ( defaultTemplate )
-            template.push( oTemplate[ defaultTemplate ] );
-        obj.template = template;
-
-        // Get the object name (for path relation) and fix the name
-        //  if needed
-        var name = args.name
-                || elem.getAttribute('id')
-                || elem.getAttribute('name');
-
-        if ( name )
-            obj.name = name;
-
-        dooObjectSetIsProp( obj, args.is || [] );
-
-        if ( isObj( parent ) ) {
-            obj.root    = parent.root || parent;
-            obj.context = parent.isContext ? parent : parent.context;
-            obj.parent  = parent;
-        }
-        else
-            obj.root = obj.context = obj; // TODO: is this really needed???
-
-        dooObjectAttachElem( obj, elem );
-
-        return obj;
-    }
-
-    Doo.prototype = Object.create( null );
-    merge( Doo.prototype, {
-        children  : dooChildrenObjectMethod
-      , destructor: dooDestructorObjectMethod
-      , doo       : dooDooObjectMethod
-      , dooing    : dooDooingObjectMethod
-      , doont     : dooDoontObjectMethod
-      , hidden    : dooHiddenObjectMethod
-      , hide      : dooHideObjectMethod
-      , length    : 0
-      , next      : dooNextObjectMethod
-      , no        : dooNoObjectMethod
-      , on        : dooOnObjectMethod
-      , pop       : dooPopObjectMethod
-      , prev      : dooPrevObjectMethod
-      , push      : dooPushObjectMethod
-      , shift     : dooShiftObjectMethod
-      , show      : dooShowObjectMethod
-      , swap      : dooSwapObjectMethod
-      , toString  : dooToStringObjectMethod
-      , unshift   : dooUnshiftObjectMethod
-      , update    : dooUpdateObjectMethod
-      , value     : dooValueObjectMethod
-    });
-
-    /*
-     * Doo Class Functions
-     */
-    function dooDefineClassFunction( name ) {
-        var impClasses = slice.call( arguments, 1 )
-          , override   = ( impClasses.pop() || {} ) // TODO: avoind creating unecessary object
-          ;
-
-        var ExtClass = impClasses.length > 0 ?
-                       impClasses.shift() : window[ Doo.defaultClass ];
-
-        /* jshint -W054 */
-        var Class = (
-            new Function(
-                "c",
-                'return function '
-                    + name
-                    + '(e,p,a) { c.call(this,e,p,a) }'
-            )
-        )( override.constructor === Object ? ExtClass : override.constructor );
-
-        Class.prototype = Object.create( ExtClass.prototype );
-
-        // TODO: re-avaluate this
-        var length = impClasses.length;
-        for ( var i = 0; i < length - 1; i++ ) {
-            var ImpClass = impClasses[ i ];
-            merge( Class.prototype, ImpClass.prototype );
-        }
-
-        merge( Class.prototype, override );
-
-        /* jshint boss: true */
-        return ( window[ name ] = Class );
     }
 
     /*
@@ -742,6 +743,31 @@
         return obj.elem.addEventListener( event, listener, capture );
     }
 
+    Doo.prototype = Object.create( null );
+    merge( Doo.prototype, {
+        children  : dooChildrenObjectMethod
+      , destructor: dooDestructorObjectMethod
+      , doo       : dooDooObjectMethod
+      , dooing    : dooDooingObjectMethod
+      , doont     : dooDoontObjectMethod
+      , hidden    : dooHiddenObjectMethod
+      , hide      : dooHideObjectMethod
+      , length    : 0
+      , next      : dooNextObjectMethod
+      , no        : dooNoObjectMethod
+      , on        : dooOnObjectMethod
+      , pop       : dooPopObjectMethod
+      , prev      : dooPrevObjectMethod
+      , push      : dooPushObjectMethod
+      , shift     : dooShiftObjectMethod
+      , show      : dooShowObjectMethod
+      , swap      : dooSwapObjectMethod
+      , toString  : dooToStringObjectMethod
+      , unshift   : dooUnshiftObjectMethod
+      , update    : dooUpdateObjectMethod
+      , value     : dooValueObjectMethod
+    });
+
     Doo.VERSION = '0.0.1';
 
     // Static object functions/methods
@@ -756,6 +782,7 @@
     // default class name
     Doo.defaultClass = 'Doo';
 
+    // Expose Classes
     window.Doo                   = Doo;
     window.DooCollection         = DooCollection;
     window.DooGroupCollection    = DooGroupCollection;
