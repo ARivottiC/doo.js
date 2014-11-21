@@ -756,12 +756,8 @@
     // default class name
     Doo.defaultClass = 'Doo';
 
-    Doo.Internals = {
-        group    : oGroup
-      , listener : oListener
-      , templates: oTemplate
-    };
-
-    window.Doo = Doo;
-    window.DooCollection = DooCollection;
+    window.Doo                   = Doo;
+    window.DooCollection         = DooCollection;
+    window.DooGroupCollection    = DooGroupCollection;
+    window.DooTemplateCollection = DooTemplateCollection;
 })( window );
