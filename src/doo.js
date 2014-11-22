@@ -282,7 +282,7 @@
      */
 
     // execute a given method in all children
-    function dooCollectionExecObjectMethod( fn ) {
+    function dooCollectionMethodExec( fn ) {
         var obj = this
           , args = splice.call( arguments, 1 )
           ;
@@ -295,51 +295,51 @@
     }
 
     // returns a DooCollection (see Array.filter)
-    function dooCollectionFilterObjectMethod() {
-        return dooCollectionSliceObjectMethod.apply(
+    function dooCollectionMethodFilter() {
+        return dooCollectionMethodSlice.apply(
             filter.apply( this, arguments )
         );
     }
 
     // returns all hidden children
-    function dooCollectionHiddenObjectMethod() {
-        return this.filter( dooHiddenObjectMethod );
+    function dooCollectionMethodHidden() {
+        return this.filter( dooMethodHidden );
     }
 
     // returns all dooing children
-    function dooCollectionDooingObjectMethod() {
-        return this.filter( dooDooingObjectMethod );
+    function dooCollectionMethodDooing() {
+        return this.filter( dooMethodDooing );
     }
 
     // returns a DooCollection (see Array.map)
-    function dooCollectionMapObjectMethod() {
-        return dooCollectionSliceObjectMethod.apply(
+    function dooCollectionMethodMap() {
+        return dooCollectionMethodSlice.apply(
             map.apply( this, arguments )
         );
     }
 
     // returns a DooCollection (see Array.slice)
-    function dooCollectionSliceObjectMethod() {
+    function dooCollectionMethodSlice() {
         var obj = new DooCollection();
         push.apply( obj, slice.apply( this, arguments ) );
         return obj;
     }
 
     // returns a DooCollection (see Array.splice)
-    function dooCollectionSpliceObjectMethod() {
-        return dooCollectionSliceObjectMethod.apply(
+    function dooCollectionMethodSplice() {
+        return dooCollectionMethodSlice.apply(
             splice.apply( this, arguments )
         );
     }
 
     merge( dooCollectionProto, {
-        exec  : dooCollectionExecObjectMethod
-      , filter: dooCollectionFilterObjectMethod
-      , hidden: dooCollectionHiddenObjectMethod
-      , dooing: dooCollectionDooingObjectMethod
-      , map   : dooCollectionMapObjectMethod
-      , slice : dooCollectionSliceObjectMethod
-      , splice: dooCollectionSpliceObjectMethod
+        exec  : dooCollectionMethodExec
+      , filter: dooCollectionMethodFilter
+      , hidden: dooCollectionMethodHidden
+      , dooing: dooCollectionMethodDooing
+      , map   : dooCollectionMethodMap
+      , slice : dooCollectionMethodSlice
+      , splice: dooCollectionMethodSplice
       , pop   : popChildOrLastChild
     });
 
@@ -499,36 +499,6 @@
      * Doo Object Methods
      */
 
-    // returns a DooCollection of this object's children
-    //  if an object is given and is a child, returns that child
-    //  if a name or number is given, and the child exists, returns if
-    //  if a function is givem. use that function as a filter
-    //  undefined returns all children
-    function dooChildrenObjectMethod( val ) {
-        var obj = this;
-
-        switch ( typeof val ) {
-            case "object":
-                if ( indexOf.call( obj, val ) >= 0 )
-                    return new DooCollection( val );
-
-                break;
-            case "string":
-            case "number":
-                if ( has( obj, val ) )
-                    return new DooCollection( obj[ val ] );
-
-                break;
-            default:
-                var array = dooCollectionProto.slice.call( obj );
-
-                if ( isFn( val ) )
-                    return array.filter( val );
-
-                return array;
-        }
-    }
-
     // cleans up all the references and support data related to this
     //  object.
     function dooDestructorObjectMethod() {
@@ -556,20 +526,20 @@
     }
 
     /* doo, doont, dooing */
-    function dooDooObjectMethod()   { return addClass( this, 'dooing'); }
-    function dooDoontObjectMethod() { return remClass( this, 'dooing'); }
-    function dooDooingObjectMethod( /* FOR INTERNAL USE*/ obj ) {
+    function dooMethodDoo()   { return addClass( this, 'dooing'); }
+    function dooMethodDoont() { return remClass( this, 'dooing'); }
+    function dooMethodDooing( /* FOR INTERNAL USE*/ obj ) {
         return hasClass( obj || this, 'dooing' );
     }
 
     /* hide, hidden, show */
-    function dooHideObjectMethod()   { return addClass(this, 'hidden' ); }
-    function dooHiddenObjectMethod() { return hasClass(this, 'hidden' ); }
-    function dooShowObjectMethod( /* FOR INTERNAL USE */ obj ) {
+    function dooMethodHide()   { return addClass(this, 'hidden' ); }
+    function dooMethodHidden() { return hasClass(this, 'hidden' ); }
+    function dooMethodShow( /* FOR INTERNAL USE */ obj ) {
         return remClass( obj || this, 'hidden' );
     }
 
-    function dooNextObjectMethod() {
+    function dooMethodNext() {
         var obj    = this;
         var parent = obj.parent;
 
@@ -583,7 +553,7 @@
         return false;
     }
 
-    function dooPopObjectMethod( child ) {
+    function dooMethodPop( child ) {
         var obj    = this;
         var orphan = popChildOrLastChild.call( obj, child );
 
@@ -593,7 +563,7 @@
         return orphan;
     }
 
-    function dooPrevObjectMethod() {
+    function dooMethodPrev() {
         var obj    = this;
         var parent = obj.parent;
 
@@ -616,7 +586,7 @@
         return pushChild( this, slice.call( arguments ), true );
     }
 
-    function dooShiftObjectMethod() {
+    function dooMethodShift() {
         var child = this[0];
 
         if ( child )
@@ -625,7 +595,7 @@
         return this;
     }
 
-    function dooSwapObjectMethod( sibling ) {
+    function dooMethodSwap( sibling ) {
         var parent = this.parent;
 
         if ( ! parent )
@@ -655,9 +625,9 @@
         return [ index1, index2 ];
     }
 
-    function dooToStringObjectMethod() { return '[object Doo]'; }
+    function dooMethodToString() { return '[object Doo]'; }
 
-    function dooUpdateObjectMethod( val ) {
+    function dooMethodUpdate( val ) {
         var obj = this;
 
         if ( Array.isArray( val ) )
@@ -689,7 +659,7 @@
     }
 
     // get the content of the object. Set the content if a value is given
-    function dooValueObjectMethod( val ) {
+    function dooMethodValue( val ) {
         var obj  = this
           , elem = obj.elem
           ;
@@ -705,7 +675,7 @@
         return ( elem.innerHTML = val );
     }
 
-    function dooNoObjectMethod( event, fn, capture ) {
+    function dooMethodNo( event, fn, capture ) {
         // TODO: capture support?
         var obj = this;
 
@@ -718,7 +688,7 @@
         return obj.elem.removeEventListener( event, listener, capture );
     }
 
-    function dooOnObjectMethod( event, fn, capture ) {
+    function dooMethodOn( event, fn, capture ) {
         // TODO: capture support?
         var obj = this;
 
@@ -743,29 +713,32 @@
         return obj.elem.addEventListener( event, listener, capture );
     }
 
-    Doo.prototype = Object.create( null );
+    Doo.prototype = Object.create( arrayProto );
     merge( Doo.prototype, {
-        children  : dooChildrenObjectMethod
-      , destructor: dooDestructorObjectMethod
-      , doo       : dooDooObjectMethod
-      , dooing    : dooDooingObjectMethod
-      , doont     : dooDoontObjectMethod
-      , hidden    : dooHiddenObjectMethod
-      , hide      : dooHideObjectMethod
+        destructor: dooDestructorObjectMethod
+      , doo       : dooMethodDoo
+      , dooing    : dooMethodDooing
+      , doont     : dooMethodDoont
+      , filter    : dooCollectionMethodFilter
+      , hidden    : dooMethodHidden
+      , hide      : dooMethodHide
       , length    : 0
-      , next      : dooNextObjectMethod
-      , no        : dooNoObjectMethod
-      , on        : dooOnObjectMethod
-      , pop       : dooPopObjectMethod
-      , prev      : dooPrevObjectMethod
+      , map       : dooCollectionMethodMap
+      , next      : dooMethodNext
+      , no        : dooMethodNo
+      , on        : dooMethodOn
+      , pop       : dooMethodPop
+      , prev      : dooMethodPrev
       , push      : dooPushObjectMethod
-      , shift     : dooShiftObjectMethod
-      , show      : dooShowObjectMethod
-      , swap      : dooSwapObjectMethod
-      , toString  : dooToStringObjectMethod
+      , shift     : dooMethodShift
+      , show      : dooMethodShow
+      , slice     : dooCollectionMethodSlice
+      , splice    : dooCollectionMethodSplice
+      , swap      : dooMethodSwap
+      , toString  : dooMethodToString
       , unshift   : dooUnshiftObjectMethod
-      , update    : dooUpdateObjectMethod
-      , value     : dooValueObjectMethod
+      , update    : dooMethodUpdate
+      , value     : dooMethodValue
     });
 
     Doo.VERSION = '0.0.1';
