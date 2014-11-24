@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8">
+
+    <title>Doo Examples</title>
+
+    <!-- CSS : implied media="all" -->
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://rawgit.com/visionmedia/mocha/master/mocha.css" />
+</head>
+<body>
+    <h1>Doo Examples</h1>
+
+    <div>
+        <h2>List</h2>
+        <div data-doo="AppContext as $list">
+            <form data-doo="AppForm">
+                <input type="text" name="text" data-doo="ElemInput">
+                <input type="submit" value="Add Item">
+                <span data-doo="AppError" class="hidden">Must suplly a value!</span>
+            </form>
+            <ul data-doo="$container is #context"><template>
+                <li data-doo="AppItem">
+                    <form data-doo="AppForm as $form" class="hidden">
+                        <input type="text" name="text" data-doo="ElemInput">
+                        <input type="submit" value="Update Item">
+                        <span data-doo="AppError { $delay: 1000 }" class="hidden">Must suplly a value!</span>
+                    </form>
+                    <span data-doo="$view">
+                        <span data-doo="$value"></span>
+                        <button data-doo="AppEdit">Edit</button>
+                        <button data-doo="AppDel">Remove</button>
+                        <button data-doo="AppSel">Select</button>
+                        <button data-doo="AppUp">Up</button>
+                        <button data-doo="AppDown">Down</button>
+                    </span>
+                </li>
+            </template></ul>
+        </li>
+    </div>
+
+    <div>
+        <h2>Table</h2>
+        <div data-doo="AppContext as $table">
+            <form data-doo="AppForm">
+                <input type="text" name="text" data-doo="ElemInput">
+                <input type="submit" value="Add Item">
+                <span data-doo="AppError" class="hidden">Must suplly a value!</span>
+            </form>
+            <table data-doo="$container is #context">
+                <thead>
+                    <tr>
+                        <td width="300">text</td>
+                        <td>Actions</td>
+                    </tr>
+                </thead>
+                <tbody><template>
+                    <tr data-doo="AppItem">
+                        <td>
+                            <form data-doo="AppForm as $form" class="hidden">
+                                <input type="text" name="text" data-doo="ElemInput">
+                                <input type="submit" value="Update Item">
+                                <span data-doo="AppError { $delay: 1000 }" class="hidden">Must suplly a value!</span>
+                            </form>
+                            <span data-doo="$view">
+                                <button data-doo="AppEdit">Edit</button>
+                                <span data-doo="$value"></span>
+                            </span>
+                        </td>
+                        <td>
+                            <button data-doo="AppDel">Remove</button>
+                            <button data-doo="AppSel">Select</button>
+                            <button data-doo="AppUp">Up</button>
+                            <button data-doo="AppDown">Down</button>
+                        </td>
+                    </tr>
+                </template></tbody>
+            </table>
+        </li>
+    </div>
+
+    <div id="mocha"></div>
+    <div id="messages"></div>
+    <div id="fixtures"></div>
+
+    <script src="http://rawgit.com/visionmedia/mocha/master/mocha.js"></script>
+    <script src="http://rawgit.com/chaijs/chai/master/chai.js"></script>
+
+    <script src="http://cdn.polyfill.io/v1/polyfill.min.js?features=default,Array.from"></script>
+    <script src="../src/doo.js"></script>
+    <script src="../src/doox.elem-input.js"></script>
+    <script src="index.js"></script>
+
+    <script type="text/javascript">
+        app = new Doo( document.body );
+    </script>
+
+    <!-- Tests -->
+    <script src="tests.js"></script>
+</body>
+</html>
