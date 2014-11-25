@@ -4,7 +4,7 @@ Binds Javascript Objects to HTML Elements using the MVB(Model-View-Binder) patte
 
 ## Mission
 
-**doo.js** were develop with the following goals:
+**doo.js** was develop with the following goals:
 
 * use only standards and pure javascript
 * use only standards and pure HTML
