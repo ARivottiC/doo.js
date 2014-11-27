@@ -639,18 +639,20 @@
             });
         else if ( isObj( val ) ) // TODO: probably better with Object.keys
             for ( var key in val ) {
-                var value = val[ key ]
-                  , $key  = '$' + key
-                  , child = obj[ $key ]
+                var value  = val[ key ]
+                  , child  = obj[ key ]
+                  , $key   = '$' + key
+                  , $child = obj[ $key ]
                   ;
 
                 if ( isFn( child ) )
                     ; // do nothing
-                else if ( has( obj, $key ) )
-                    if ( isA( child, Doo ) )
-                        child.update( value );
-                    else
-                        obj[ $key ] = value;
+                else if ( has( obj, $key ) && isA( $child, Doo ) )
+                    $child.update( value );
+                else if ( has( obj, key ) && isA( child, Doo ) )
+                    child.update( value );
+                else if ( has( obj, key ) )
+                    obj[ key ] = value;
             }
         else
             obj.value( val );

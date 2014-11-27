@@ -1,10 +1,11 @@
 # doo.js
 
-Binds Javascript Objects to HTML Elements using the MVB(Model-View-Binder) pattern.
+Binds Javascript Objects to HTML Elements using the MVB(Model-View-Binder)
+ pattern.
 
 ## Mission
 
-**doo.js** were develop with the following goals:
+**doo.js** was develop with the following goals:
 
 * use only standards and pure javascript
 * use only standards and pure HTML
@@ -33,11 +34,13 @@ Binds Javascript Objects to HTML Elements using the MVB(Model-View-Binder) patte
 </body>
 ```
 
-See the [Wiki](wiki) for more on **doo.js**.
+See the [Wiki](https://github.com/ARivottiC/doo.js/wiki) for more on
+ **doo.js**.
 
 ## Acknowledges
 
-The following were involved, or contributed in any way, for the final implementation of **doo.js**:
+The following were involved, or contributed in any way, for the final
+ implementation of **doo.js**:
 
 * [Shemahmforash](https://github.com/Shemahmforash)
 * [JWebCoder](https://github.com/JWebCoder)
