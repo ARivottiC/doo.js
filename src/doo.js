@@ -42,6 +42,10 @@
      */
 
     //
+    function elemHasParent( elem ) {
+        return elem.parentNode && elem.parentElement;
+    }
+
     // Check if a given object has a given key
     function has( obj, key ) {
         return Object.prototype.hasOwnProperty.call( obj, key );
@@ -167,21 +171,20 @@
     }
 
     // attach a child to the object
-    function attachChild( obj, elem, arg ) {
+    function dooChild( parent, elem ) {
         // if element is not a node, it is a string or number. Get the
         //  corresponding template
         //  TODO: must be able to support multiple childs inside a template
         //  TODO: support global templates
         if ( ! elem.nodeType )
             elem = document.importNode(
-                    obj.template[ elem ].content, true
+                    parent.template[ elem ].content, true
                 ).children[0];
 
         // Merge arg with attr configuration
-        arg = merge(
+        var arg = merge(
                 { 'class': Doo.defaultClass }
                 , attributeValueToObject( elem.getAttribute( Doo.defaultAttr ) )
-                , arg
             );
 
         var Constructor = window[ arg['class'] ];
@@ -193,7 +196,7 @@
                   + ", maybe you forgot to set it?"
                 );
 
-        var child = new Constructor( elem, obj, arg )
+        var child = new Constructor( elem, parent, arg )
             , name  = child.name
             ;
 
@@ -205,60 +208,12 @@
         if ( ! isUndef( name )  )
             child.context[ '$' + name ] = child;
 
-        attachChildToParent( obj, child, arg.index );
-
         return child;
-    }
-
-    // attach a child to a parent
-    //  of the object is an Prepender, set index to 0
-    //  if an index is given, attach it to that parent's position
-    function attachChildToParent( obj, child, index ) {
-        var isAppender = ! obj.length      // empty, push allways work
-                      || isUndef( index )  // index is not defined
-                      || ! obj[ index ]    // or doesn'ts have that child
-                      || index !== 0       // or index not 0
-          , childElem  = child.elem
-          , parentElem = obj.elem
-          ;
-
-        // add element to the dom if the element has no parent
-        //  in IE8 an unattached element as a "Document Fragment"? as
-        //  parentNode
-        if ( !( childElem.parentNode && childElem.parentElement ) )
-            if ( isAppender )
-                parentElem.appendChild( childElem );
-            else
-                parentElem.insertBefore( childElem, obj[ index ].elem );
-
-        if ( isUndef( index ) )
-            return push.call( obj, child );
-        else
-            splice.call( obj, index, 0, child );
     }
 
     // check if object's element has a given class set
     function hasClass( obj, val ) {
         return obj.elem.classList.contains( val );
-    }
-
-    function pushChild( obj, values, reverse ) {
-        var args = {};
-
-        if ( reverse ) {
-            values = values.reverse();
-            args.index = 0;
-        }
-
-        forEach.call( values, function ( value ) {
-            var child = attachChild( obj, ( value.template || 0 ), args );
-            if ( value !== void 0 ) {
-                delete value.template;
-                child.update( value );
-            }
-        });
-
-        return obj;
     }
 
     // remove object's element class
@@ -460,7 +415,7 @@
             return ;
 
         if ( ! isNull( child.getAttribute( Doo.defaultAttr ) ) )
-            attachChild( obj, child );
+            obj.push( child );
         else if ( child.nodeName === 'TEMPLATE' )
             dooObjectAttachTemplate( obj, child );
         else
@@ -501,10 +456,12 @@
 
     // cleans up all the references and support data related to this
     //  object.
-    function dooDestructorObjectMethod() {
+    function dooMethodDestructor( keepElem ) {
         var obj = this;
 
-        obj.value( null );
+        // destroy the objects but keep the elements
+        while ( obj.length )
+            popChildOrLastChild.call( obj ).destructor( true );
 
         // remove me from group
         obj.group.pop( obj );
@@ -516,13 +473,17 @@
         obj.template = null;
 
         // remove o from the dom
-        obj.elem.dooObject = null;
-        obj.elem.parentNode.removeChild( obj.elem );
+        var elem = obj.elem;
         obj.elem = null;
+        elem.dooObject = null;
+        if ( !keepElem )
+            elem.parentNode.removeChild( elem );
 
         obj.context = null;
         obj.parent  = null;
         obj.root    = null;
+
+        return elem;
     }
 
     /* doo, doont, dooing */
@@ -554,13 +515,9 @@
     }
 
     function dooMethodPop( child ) {
-        var obj    = this;
-        var orphan = popChildOrLastChild.call( obj, child );
+        var orphan = popChildOrLastChild.call( this, child );
 
-        if ( orphan )
-            orphan.destructor();
-
-        return orphan;
+        return orphan ? orphan.destructor() : null;
     }
 
     function dooMethodPrev() {
@@ -578,21 +535,45 @@
         return false;
     }
 
-    function dooPushObjectMethod() {
-        return pushChild( this, slice.call( arguments ) );
+    function dooMethodPush( elem ) {
+        var obj        = this
+          , child      = dooChild( obj, elem || 0 )
+          , childElem  = child.elem
+          , parentElem = obj.elem
+          ;
+
+        if ( !elemHasParent( childElem ) )
+            parentElem.appendChild( childElem );
+
+        push.call( obj, child );
+
+        return child;
     }
 
-    function dooUnshiftObjectMethod() {
-        return pushChild( this, slice.call( arguments ), true );
+    function dooMethodUnshift( elem ) {
+        var obj = this;
+
+        if ( !object.length ) // allways a push if empty
+            return obj.push( elem );
+
+        var child      = dooChild( obj, elem || 0 )
+          , childElem  = child.elem
+          , parentElem = obj.elem
+          ;
+
+        if ( !elemHasParent( childElem ) )
+            parentElem.insertBefore( childElem, obj[0].elem );
+
+        splice.call( obj, index, 0, child );
+
+        return child;
     }
 
     function dooMethodShift() {
-        var child = this[0];
+        var obj   = this
+          , child = obj[0];
 
-        if ( child )
-            this.pop( child );
-
-        return this;
+        return child ? obj.pop( child ) : null;
     }
 
     function dooMethodSwap( sibling ) {
@@ -666,15 +647,21 @@
           , elem = obj.elem
           ;
 
+        var method = 'innerHTML';
+        if ( has( elem, 'value' ) )
+            method = 'value';
+        else if ( has( elem, 'src' ) )
+            method = 'src';
+
         if ( isUndef( val ) )
-            return elem.innerHTML;
+            return elem[ method ];
 
         // Setting value will change innerHTML, destroy all children
         while ( obj.length )
             obj.pop();
 
         /* jshint boss: true */
-        return ( elem.innerHTML = val );
+        return ( elem[ method ] = val );
     }
 
     function dooMethodNo( event, fn, capture ) {
@@ -717,7 +704,7 @@
 
     Doo.prototype = Object.create( arrayProto );
     merge( Doo.prototype, {
-        destructor: dooDestructorObjectMethod
+        destructor: dooMethodDestructor
       , doo       : dooMethodDoo
       , dooing    : dooMethodDooing
       , doont     : dooMethodDoont
@@ -731,14 +718,14 @@
       , on        : dooMethodOn
       , pop       : dooMethodPop
       , prev      : dooMethodPrev
-      , push      : dooPushObjectMethod
+      , push      : dooMethodPush
       , shift     : dooMethodShift
       , show      : dooMethodShow
       , slice     : dooCollectionMethodSlice
       , splice    : dooCollectionMethodSplice
       , swap      : dooMethodSwap
       , toString  : dooMethodToString
-      , unshift   : dooUnshiftObjectMethod
+      , unshift   : dooMethodUnshift
       , update    : dooMethodUpdate
       , value     : dooMethodValue
     });

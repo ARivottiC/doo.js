@@ -15,7 +15,7 @@
         isContext: true
       , update: function ( val ) {
             if ( Array.isArray( val ) )
-                return this.$container.push( val );
+                return this.$container.push().update( val );
         }
 
     });
