@@ -16,14 +16,14 @@
         <h2>List</h2>
         <div data-doo="AppContext as $list">
             <form data-doo="AppForm">
-                <input type="text" name="text" data-doo="ElemInput">
+                <input type="text" name="text" data-doo>
                 <input type="submit" value="Add Item">
                 <span data-doo="AppError" class="hidden">Must suplly a value!</span>
             </form>
             <ul data-doo="$container is #context"><template>
                 <li data-doo="AppItem">
                     <form data-doo="AppForm as $form" class="hidden">
-                        <input type="text" name="text" data-doo="ElemInput">
+                        <input type="text" name="text" data-doo>
                         <input type="submit" value="Update Item">
                         <span data-doo="AppError { $delay: 1000 }" class="hidden">Must suplly a value!</span>
                     </form>
@@ -44,7 +44,7 @@
         <h2>Table</h2>
         <div data-doo="AppContext as $table">
             <form data-doo="AppForm">
-                <input type="text" name="text" data-doo="ElemInput">
+                <input type="text" name="text" data-doo>
                 <input type="submit" value="Add Item">
                 <span data-doo="AppError" class="hidden">Must suplly a value!</span>
             </form>
@@ -59,7 +59,7 @@
                     <tr data-doo="AppItem">
                         <td>
                             <form data-doo="AppForm as $form" class="hidden">
-                                <input type="text" name="text" data-doo="ElemInput">
+                                <input type="text" name="text" data-doo>
                                 <input type="submit" value="Update Item">
                                 <span data-doo="AppError { $delay: 1000 }" class="hidden">Must suplly a value!</span>
                             </form>
@@ -89,7 +89,6 @@
 
     <script src="http://cdn.polyfill.io/v1/polyfill.min.js?features=default,Array.from"></script>
     <script src="../src/doo.js"></script>
-    <script src="../src/doox.elem-input.js"></script>
     <script src="index.js"></script>
 
     <script type="text/javascript">

@@ -647,15 +647,21 @@
           , elem = obj.elem
           ;
 
+        var method = 'innerHTML';
+        if ( has( elem, 'value' ) )
+            method = 'value';
+        else if ( has( elem, 'src' ) )
+            method = 'src';
+
         if ( isUndef( val ) )
-            return elem.innerHTML;
+            return elem[ method ];
 
         // Setting value will change innerHTML, destroy all children
         while ( obj.length )
             obj.pop();
 
         /* jshint boss: true */
-        return ( elem.innerHTML = val );
+        return ( elem[ method ] = val );
     }
 
     function dooMethodNo( event, fn, capture ) {
