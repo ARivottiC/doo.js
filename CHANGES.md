@@ -1,3 +1,6 @@
+* 0.1.1
+  * Fixed pop() method
+
 * 0.1.0
   * value now looks for value and src before innerHTML
   * push and unshift can receive an element and don't update

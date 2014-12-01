@@ -115,9 +115,9 @@
      */
 
     function popChildOrLastChild( child ) {
-        var obj = this;
+        var obj   = this;
         var index = isUndef( child )
-                  ? obj[ obj.length - 1 ]
+                  ? obj.length - 1
                   : indexOf.call( obj, child );
 
         if ( index === -1 )
