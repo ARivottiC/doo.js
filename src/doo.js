@@ -34,7 +34,7 @@
       , rIn      = /(?:^|\s+)(?:in\s+)?\@(\w+)/g
       , rAs      = /(?:^|\s+)(?:as\s+)?\$(\w+)/g
       , rUse     = /(?:^|\s+)(?:use\s+)?\&(\w+)/g
-      , rArgs    = /(?:^|\s+)\{\s*([^\}]+)\s*}/g
+      , rArgs    = /(?:^|\s+)\{\s+?([^\}]+)\s+?}/g
       ;
 
     /*
@@ -334,6 +334,7 @@
         // TODO: dooObjectSetTemplateProp
         var template = new DooTemplateCollection();
         var defaultTemplate = args.template || obj.template;
+        template.name = defaultTemplate;
         if ( defaultTemplate )
             template.push( oTemplate[ defaultTemplate ] );
         obj.template = template;
@@ -438,6 +439,8 @@
         obj.group = group
                 ? pathToObj( oGroup, group, new DooGroupCollection() )
                 : new DooGroupCollection();
+
+        obj.group.name = group;
         obj.group.push( obj );
     }
 

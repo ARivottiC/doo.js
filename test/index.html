@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://rawgit.com/visionmedia/mocha/master/mocha.css" />
+</head>
+<body>
+    <hr data-doo>
+    <hr data-doo="as $line">
+    <hr data-doo="$sep">
+    <hr data-doo="is #line #sep">
+    <hr data-doo="in @line">
+    <hr data-doo="@sep">
+    <hr data-doo="use &line">
+    <hr data-doo="&sep">
+    <hr data-doo="TestDataDoo { line: 1, sep: 2 }">
+
+    <div id="mocha"></div>
+    <script src="http://rawgit.com/visionmedia/mocha/master/mocha.js"></script>
+    <script src="http://rawgit.com/chaijs/chai/master/chai.js"></script>
+
+    <script>
+        mocha.ui('bdd');
+        mocha.reporter('html');
+        expect = chai.expect;
+    </script>
+
+    <script src="http://cdn.polyfill.io/v1/polyfill.min.js?features=default,Array.from"></script>
+    <script src="../src/doo.js"></script>
+
+    <script type="text/javascript">
+        Doo.define('TestDefine', {
+            simple: true
+        });
+
+        Doo.define('TestDataDoo', {
+            constructor: function ( elem, parent, arg ) {
+                Doo.apply( this, arguments );
+                this.$$line = arg.line;
+                this.$$sep  = arg.sep;
+            }
+        });
+
+        app = new Doo( document.body );
+    </script>
+
+    <!-- Tests -->
+    <script src="new.js"></script>
+    <script src="define.js"></script>
+    <script src="data-doo.js"></script>
+
+     <script>
+        if ( window.mochaPhantomJS )
+            mochaPhantomJS.run();
+        else {
+            mocha.checkLeaks();
+            mocha.run();
+        }
+    </script>
+
+    <script>
+    </script>
+</body>
+</html>
