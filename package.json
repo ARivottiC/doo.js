@@ -1,0 +1,14 @@
+{
+    "name": "doo.js",
+    "description": "Binds Javascript Objects to HTML Elements using the MVB(Model-View-Binder) pattern.",
+    "version": "0.1.1",
+    "author": "André Rivotti Casimiro <andre.r.casimiro@gmail.com> (https://github.com/ARivottiC)",
+    "scripts": {
+        "test": "make test"
+    },
+    "devDependencies": {
+        "mocha": "*",
+        "chai": "*",
+        "mocha-phantomjs": "*"
+    }
+}

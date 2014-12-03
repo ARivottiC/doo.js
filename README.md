@@ -1,5 +1,7 @@
 # doo.js
 
+![Build status](https://api.travis-ci.org/ARivottiC/doo.js.png)
+
 Binds Javascript Objects to HTML Elements using the MVB(Model-View-Binder)
  pattern.
 

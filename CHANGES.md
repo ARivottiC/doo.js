@@ -1,3 +1,9 @@
+* 0.2.0
+  * group and template now have a name property
+  * Added .travis.yml
+  * Added package.json
+  * Added Makefile
+
 * 0.1.1
   * Fixed pop() method
 
